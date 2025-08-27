@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/leaderboard.dart';
 import '../services/api_service.dart';
 import '../services/token_service.dart';
+import '../utils/app_logger.dart';
 
 class TopUsersScreen extends StatefulWidget {
   const TopUsersScreen({super.key});
@@ -45,7 +46,7 @@ class _TopUsersScreenState extends State<TopUsersScreen> {
       });
       
     } catch (e) {
-      print('Error fetching leaderboard: $e');
+      AppLogger.error('Error fetching leaderboard: ', e);
       setState(() {
         _errorMessage = 'Failed to load leaderboard. Please try again.';
         _isLoading = false;

@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/home_data.dart';
 import '../constants/api_constants.dart';
 import 'token_service.dart';
+import '../utils/app_logger.dart';
 
 class ApiService {
   // Common headers for API requests
@@ -275,43 +276,43 @@ class ApiService {
   }) async {
     try {
       final endpoint = ApiConstants.getQuestionsByCategoryEndpoint(categoryId);
-      print('🔗 API Call: ${ApiConstants.baseUrl}$endpoint');
-      print('🔑 Token: ${token ?? 'No token provided'}');
+      AppLogger.info('🔗 API Call: ${ApiConstants.baseUrl}', endpoint);
+      AppLogger.error('🔑 Token: ${token ?? 'No token provided'}');
       
       final response = await get(endpoint, token: token);
-      print('📊 Response Status: ${response.statusCode}');
-      print('📋 Response Body Length: ${response.body.length} characters');
-      print('📋 Response Body Preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
+      AppLogger.info('📊 Response Status: ${response.statusCode}');
+      AppLogger.info('📋 Response Body Length: ${response.body.length} characters');
+      AppLogger.info('📋 Response Body Preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}...');
       
       // Check if response is successful
       if (response.statusCode >= 200 && response.statusCode < 300) {
         // Parse JSON directly since API returns array
         final jsonData = json.decode(response.body);
-        print('🎯 Parsed Data Type: ${jsonData.runtimeType}');
-        
+        AppLogger.info('🎯 Parsed Data Type: ${jsonData.runtimeType}');
+
         // Check if it's a direct array (which it should be for this API)
         if (jsonData is List) {
-          print('✅ Received direct questions array with ${jsonData.length} items');
+          AppLogger.info('✅ Received direct questions array with ${jsonData.length} items');
           return List<dynamic>.from(jsonData);
         } else if (jsonData is Map) {
           // Fallback: if it's wrapped in an object, look for questions
           final data = jsonData as Map<String, dynamic>;
-          print('🗂️ Response is object with keys: ${data.keys.toList()}');
+          AppLogger.info('🗂️ Response is object with keys: ${data.keys.toList()}');
           
           if (data['questions'] != null && data['questions'] is List) {
             final questions = data['questions'] as List;
-            print('✅ Found questions array with ${questions.length} items');
+            AppLogger.info('✅ Found questions array with ${questions.length} items');
             return List<dynamic>.from(questions);
           } else if (data['data'] != null && data['data'] is List) {
             final questions = data['data'] as List;
-            print('✅ Found data array with ${questions.length} items');
+            AppLogger.info('✅ Found data array with ${questions.length} items');
             return List<dynamic>.from(questions);
           } else {
-            print('⚠️ No questions or data array found in response');
-            print('📋 Full response structure: $data');
+            AppLogger.warning('⚠️ No questions or data array found in response');
+            AppLogger.info('📋 Full response structure: $data');
           }
         } else {
-          print('❌ Unexpected response format: ${jsonData.runtimeType}');
+          AppLogger.error('❌ Unexpected response format: ${jsonData.runtimeType}');
         }
       } else {
         throw Exception('HTTP Error ${response.statusCode}: ${response.body}');
@@ -319,7 +320,7 @@ class ApiService {
       
       return [];
     } catch (e) {
-      print('❌ API Error for category $categoryId: $e');
+      AppLogger.error('❌ API Error for category $categoryId: $e');
       throw Exception('Failed to load questions for category $categoryId: $e');
     }
   }
@@ -331,25 +332,25 @@ class ApiService {
   }) async {
     try {
       final endpoint = ApiConstants.getQuestionsByCategoryEndpoint(categoryId);
-      print('🧪 TEST API Call: ${ApiConstants.baseUrl}$endpoint');
-      print('🔑 TEST Token: $testToken');
-      
+      AppLogger.info('🧪 TEST API Call: ${ApiConstants.baseUrl}$endpoint');
+      AppLogger.info('🔑 TEST Token: $testToken');
+
       final response = await get(endpoint, token: testToken);
-      print('📊 TEST Response Status: ${response.statusCode}');
-      print('📋 TEST Response Body: ${response.body}');
-      
+      AppLogger.info('📊 TEST Response Status: ${response.statusCode}');
+      AppLogger.info('📋 TEST Response Body: ${response.body}');
+
       if (response.statusCode == 200) {
         final data = handleResponse(response);
         if (data['questions'] != null && data['questions'] is List) {
           final questions = data['questions'] as List;
-          print('✅ TEST: Found ${questions.length} questions');
+          AppLogger.info('✅ TEST: Found ${questions.length} questions');
           return List<dynamic>.from(questions);
         }
       }
       
       return [];
     } catch (e) {
-      print('❌ TEST API Error: $e');
+      AppLogger.error('❌ TEST API Error: $e');
       throw Exception('Test API failed: $e');
     }
   }
@@ -361,11 +362,11 @@ class ApiService {
     required String token,
   }) async {
     try {
-      print('🚀 Submitting Quiz:');
-      print('   CategoryId: $categoryId');
-      print('   Total Questions: $totalQuestions');
-      print('   Total Correct: $totalCorrect');
-      
+      AppLogger.info('🚀 Submitting Quiz:');
+      AppLogger.info('   CategoryId: $categoryId');
+      AppLogger.info('   Total Questions: $totalQuestions');
+      AppLogger.info('   Total Correct: $totalCorrect');
+
       // Calculate score as percentage
       final score = totalQuestions > 0 ? ((totalCorrect / totalQuestions) * 100).round() : 0;
       
@@ -409,15 +410,15 @@ class ApiService {
         token: token,
       );
       
-      print('📊 Submit Response Status: ${response.statusCode}');
-      print('📋 Submit Response Body: ${response.body}');
-      
+      AppLogger.info('📊 Submit Response Status: ${response.statusCode}');
+      AppLogger.info('📋 Submit Response Body: ${response.body}');
+
       final result = handleResponse(response);
-      print('✅ Parsed Submit Result: $result');
-      
+      AppLogger.info('✅ Parsed Submit Result: $result');
+
       return result;
     } catch (e) {
-      print('❌ Submit Quiz Error: $e');
+      AppLogger.error('❌ Submit Quiz Error: $e');
       throw Exception('Failed to submit quiz: $e');
     }
   }
@@ -507,7 +508,7 @@ class ApiService {
         }
         
         // If the response structure is different, return empty list
-        print('Unexpected leaderboard response structure: $decodedData');
+        AppLogger.error('Unexpected leaderboard response structure: $decodedData');
         return [];
       } else {
         throw Exception('API Error: ${response.statusCode} - ${response.body}');

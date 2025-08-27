@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import '../services/api_service.dart';
 import '../services/token_service.dart';
+import '../utils/app_logger.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<dynamic> questions;
@@ -347,7 +348,7 @@ class _ResultScreenState extends State<ResultScreen> {
         token: token,
       );
 
-      print('🎯 Quiz Submit Response: $result');
+      AppLogger.info('🎯 Quiz Submit Response: ', result);
       
       // The API now returns the submitted data, including our calculated score
       final apiScore = result['score'];

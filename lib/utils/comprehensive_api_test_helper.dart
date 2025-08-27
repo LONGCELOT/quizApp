@@ -1,126 +1,127 @@
 import '../utils/api_test_helper.dart';
 import '../utils/profile_api_test_helper.dart';
+import 'app_logger.dart';
 
 class ComprehensiveAPITestHelper {
   
   /// Test all APIs in the application
   static Future<void> testAllAPIs() async {
-    print('🚀 Starting Comprehensive API Testing Suite...\n');
-    print('=' * 60);
+    AppLogger.info('🚀 Starting Comprehensive API Testing Suite...');
+    AppLogger.info('=' * 60);
     
     // Test Quiz and Leaderboard APIs
-    print('📝 QUIZ & LEADERBOARD API TESTS');
-    print('=' * 60);
+    AppLogger.info('📝 QUIZ & LEADERBOARD API TESTS');
+    AppLogger.info('=' * 60);
     await APITestHelper.testBothAPIs();
     
-    print('\n' + '=' * 60);
-    print('👤 PROFILE API TESTS');
-    print('=' * 60);
+    AppLogger.info('=' * 60);
+    AppLogger.info('👤 PROFILE API TESTS');
+    AppLogger.info('=' * 60);
     await ProfileAPITestHelper.testAllProfileAPIs();
     
-    print('\n' + '=' * 60);
-    print('🏁 COMPREHENSIVE API TESTING COMPLETED!');
-    print('=' * 60);
+    AppLogger.info('=' * 60);
+    AppLogger.info('🏁 COMPREHENSIVE API TESTING COMPLETED!');
+    AppLogger.info('=' * 60);
     _printSummary();
   }
   
   /// Test only read-only APIs (safe for production)
   static Future<void> testReadOnlyAPIs() async {
-    print('🔍 Starting Read-Only API Testing Suite...\n');
-    print('=' * 50);
+    AppLogger.info('🔍 Starting Read-Only API Testing Suite...');
+    AppLogger.info('=' * 50);
     
-    print('📝 QUIZ & LEADERBOARD APIs (Read-Only)');
-    print('=' * 50);
+    AppLogger.info('📝 QUIZ & LEADERBOARD APIs (Read-Only)');
+    AppLogger.info('=' * 50);
     await APITestHelper.testGeneralQuizAPI();
-    print('');
+    AppLogger.info('');
     await APITestHelper.testLeaderboardAPI();
     
-    print('\n' + '=' * 50);
-    print('👤 PROFILE APIs (Read-Only)');
-    print('=' * 50);
+    AppLogger.info('=' * 50);
+    AppLogger.info('👤 PROFILE APIs (Read-Only)');
+    AppLogger.info('=' * 50);
     await ProfileAPITestHelper.testReadOnlyAPIs();
     
-    print('\n' + '=' * 50);
-    print('✅ READ-ONLY API TESTING COMPLETED!');
-    print('=' * 50);
+    AppLogger.info('=' * 50);
+    AppLogger.info('✅ READ-ONLY API TESTING COMPLETED!');
+    AppLogger.info('=' * 50);
     _printReadOnlySummary();
   }
   
   /// Test individual API categories
   static Future<void> testQuizAPIs() async {
-    print('📝 Testing Quiz APIs Only...\n');
+    AppLogger.info('📝 Testing Quiz APIs Only...\n');
     await APITestHelper.testBothAPIs();
   }
   
   static Future<void> testProfileAPIs() async {
-    print('👤 Testing Profile APIs Only...\n');
+    AppLogger.info('👤 Testing Profile APIs Only...\n');
     await ProfileAPITestHelper.testAllProfileAPIs();
   }
   
   /// Print testing summary
   static void _printSummary() {
-    print('\n📊 API TESTING SUMMARY:');
-    print('✅ General Quiz Questions API (/api/questions/list/by-category/1)');
-    print('✅ Top Users/Leaderboard API (/api/report/top10/player)');
-    print('✅ Get User Profile API (/api/profile/info)');
-    print('✅ Update User Profile API (/api/profile/info/update)');
-    print('⚠️ Change Password API (/api/profile/password/change) - Skipped for safety');
-    print('\n📝 Notes:');
-    print('- All APIs use Bearer token authentication when available');
-    print('- Quiz/Leaderboard APIs have fallback data if they fail');
-    print('- Profile APIs require authentication');
-    print('- Password change API was skipped to prevent accidental changes');
-    print('\n🔧 To test password change API, uncomment the line in ProfileAPITestHelper.testAllProfileAPIs()');
+    AppLogger.info('\n📊 API TESTING SUMMARY:');
+    AppLogger.info('✅ General Quiz Questions API (/api/questions/list/by-category/1)');
+    AppLogger.info('✅ Top Users/Leaderboard API (/api/report/top10/player)');
+    AppLogger.info('✅ Get User Profile API (/api/profile/info)');
+    AppLogger.info('✅ Update User Profile API (/api/profile/info/update)');
+    AppLogger.info('⚠️ Change Password API (/api/profile/password/change) - Skipped for safety');
+    AppLogger.info('\n📝 Notes:');
+    AppLogger.info('- All APIs use Bearer token authentication when available');
+    AppLogger.info('- Quiz/Leaderboard APIs have fallback data if they fail');
+    AppLogger.info('- Profile APIs require authentication');
+    AppLogger.info('- Password change API was skipped to prevent accidental changes');
+    AppLogger.info('\n🔧 To test password change API, uncomment the line in ProfileAPITestHelper.testAllProfileAPIs()');
   }
   
   static void _printReadOnlySummary() {
-    print('\n📊 READ-ONLY API TESTING SUMMARY:');
-    print('✅ General Quiz Questions API (GET)');
-    print('✅ Top Users/Leaderboard API (GET)');
-    print('✅ Get User Profile API (GET)');
-    print('\n📝 Notes:');
-    print('- Only safe, read-only operations were tested');
-    print('- No data was modified during testing');
-    print('- These tests are safe to run in production');
+    AppLogger.info('\n📊 READ-ONLY API TESTING SUMMARY:');
+    AppLogger.info('✅ General Quiz Questions API (GET)');
+    AppLogger.info('✅ Top Users/Leaderboard API (GET)');
+    AppLogger.info('✅ Get User Profile API (GET)');
+    AppLogger.info('\n📝 Notes:');
+    AppLogger.info('- Only safe, read-only operations were tested');
+    AppLogger.info('- No data was modified during testing');
+    AppLogger.info('- These tests are safe to run in production');
   }
   
   /// Quick health check for all APIs
   static Future<void> healthCheck() async {
-    print('🏥 Performing API Health Check...\n');
+    AppLogger.info('🏥 Performing API Health Check...\n');
     
     bool allHealthy = true;
     
     // Check Quiz API
     try {
-      print('🔍 Checking Quiz API...');
+      AppLogger.info('🔍 Checking Quiz API...');
       await APITestHelper.testGeneralQuizAPI();
-      print('✅ Quiz API: Healthy');
+      AppLogger.info('✅ Quiz API: Healthy');
     } catch (e) {
-      print('❌ Quiz API: Unhealthy - $e');
+      AppLogger.error('❌ Quiz API: Unhealthy - ', e);
       allHealthy = false;
     }
     
     // Check Leaderboard API
     try {
-      print('\n🔍 Checking Leaderboard API...');
+      AppLogger.info('\n🔍 Checking Leaderboard API...');
       await APITestHelper.testLeaderboardAPI();
-      print('✅ Leaderboard API: Healthy');
+      AppLogger.info('✅ Leaderboard API: Healthy');
     } catch (e) {
-      print('❌ Leaderboard API: Unhealthy - $e');
+      AppLogger.error('❌ Leaderboard API: Unhealthy - $e');
       allHealthy = false;
     }
     
     // Check Profile API (read-only)
     try {
-      print('\n🔍 Checking Profile API...');
+      AppLogger.info('\n🔍 Checking Profile API...');
       await ProfileAPITestHelper.testGetUserProfileAPI();
-      print('✅ Profile API: Healthy');
+      AppLogger.info('✅ Profile API: Healthy');
     } catch (e) {
-      print('❌ Profile API: Unhealthy - $e');
+      AppLogger.error('❌ Profile API: Unhealthy - ', e);
       allHealthy = false;
     }
-    
-    print('\n' + '=' * 40);
+
+    AppLogger.info('\n' + '=' * 40);
     if (allHealthy) {
       print('✅ ALL APIS HEALTHY');
     } else {

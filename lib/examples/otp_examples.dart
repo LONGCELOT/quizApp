@@ -6,18 +6,28 @@ library;
 import '../services/otp_service.dart';
 import '../services/api_service.dart';
 import '../services/auth_manager.dart';
+import '../utils/app_logger.dart';
 
 class OtpExamples {
-  /// Example 1: Send OTP for signup
+  /// Example 1: Send OTP for signup with comprehensive error handling
   static Future<void> sendSignupOtpExample() async {
     try {
       await OtpService.sendSignupOTP(
         countryCode: '855',  // Cambodia country code
         phone: '974976736',  // Phone number without country code
       );
-      print('Signup OTP sent successfully!');
+      AppLogger.info('Signup OTP sent successfully!');
+    } on InvalidPhoneNumberException catch (e) {
+      AppLogger.warning('Invalid phone number', e);
+      // In a real app, you might show a blue message to user
+    } on NetworkException catch (e) {
+      AppLogger.error('Network error', e);
+      // In a real app, you might show a retry option
+    } on UserAlreadyExistsException catch (e) {
+      AppLogger.warning('User already exists', e);
+      // In a real app, you might redirect to login screen
     } catch (e) {
-      print('Failed to send signup OTP: $e');
+      AppLogger.error('Failed to send signup OTP', e);
     }
   }
   
@@ -28,9 +38,9 @@ class OtpExamples {
         countryCode: '855',
         phone: '974976736',
       );
-      print('Reset OTP sent successfully!');
+      AppLogger.info('Reset OTP sent successfully!');
     } catch (e) {
-      print('Failed to send reset OTP: $e');
+      AppLogger.error('Failed to send reset OTP', e);
     }
   }
   
@@ -41,9 +51,9 @@ class OtpExamples {
         countryCode: '855',
         phone: '974976736',
       );
-      print('OTP resent successfully!');
+      AppLogger.info('OTP resent successfully!');
     } catch (e) {
-      print('Failed to resend OTP: $e');
+      AppLogger.error('Failed to resend OTP', e);
     }
   }
   
@@ -56,9 +66,9 @@ class OtpExamples {
         otp: '123456',  // The OTP code received
         password: 'securepassword',
       );
-      print('Registration successful: $response');
+      AppLogger.info('Registration successful', response);
     } catch (e) {
-      print('Registration failed: $e');
+      AppLogger.error('Registration failed', e);
     }
   }
   
@@ -71,9 +81,9 @@ class OtpExamples {
         otp: '123456',  // The OTP code received
         password: 'securepassword',
       );
-      print('Login successful: $response');
+      AppLogger.info('Login successful', response);
     } catch (e) {
-      print('Login failed: $e');
+      AppLogger.error('Login failed', e);
     }
   }
   
@@ -85,9 +95,9 @@ class OtpExamples {
         phone: '974976736',
         password: 'securepassword',
       );
-      print('Login successful: $response');
+      AppLogger.info('Login successful', response);
     } catch (e) {
-      print('Login failed (may require OTP): $e');
+      AppLogger.error('Login failed (may require OTP)', e);
     }
   }
   
@@ -100,9 +110,9 @@ class OtpExamples {
         otp: '123456',  // The OTP code received
         newPassword: 'newSecurePassword',
       );
-      print('Password reset successful: $response');
+      AppLogger.info('Password reset successful', response);
     } catch (e) {
-      print('Password reset failed: $e');
+      AppLogger.error('Password reset failed', e);
     }
   }
   
@@ -113,22 +123,22 @@ class OtpExamples {
         countryCode: '855',
         phone: '974976736',
       );
-      print('API Response: $response');
+      AppLogger.info('API Response', response);
     } catch (e) {
-      print('API Error: $e');
+      AppLogger.error('API Error', e);
     }
   }
   
-  /// Example 8: Validate phone number before sending
+  /// Example 8: Validate phone number before sending with comprehensive validation
   static Future<void> validatedOtpExample(String countryCode, String phone) async {
     // Validate inputs
     if (!OtpService.isValidCountryCode(countryCode)) {
-      print('Invalid country code: $countryCode');
+      AppLogger.warning('Invalid country code', {'countryCode': countryCode});
       return;
     }
     
     if (!OtpService.isValidPhoneNumber(phone)) {
-      print('Invalid phone number: $phone');
+      AppLogger.warning('Invalid phone number', {'phone': phone});
       return;
     }
     
@@ -140,9 +150,15 @@ class OtpExamples {
       
       // Format for display
       String displayNumber = OtpService.formatPhoneNumber(countryCode, phone);
-      print('OTP sent to: $displayNumber');
+      AppLogger.info('OTP sent to', {'displayNumber': displayNumber});
+    } on InvalidPhoneNumberException catch (e) {
+      AppLogger.warning('Phone validation failed', e);
+    } on NetworkException catch (e) {
+      AppLogger.error('Network issue', e);
+    } on UserAlreadyExistsException catch (e) {
+      AppLogger.warning('User exists', e);
     } catch (e) {
-      print('Failed to send OTP: $e');
+      AppLogger.error('Failed to send OTP', e);
     }
   }
 
@@ -152,12 +168,12 @@ class OtpExamples {
       final isAuthenticated = await AuthManager.isAuthenticated();
       if (isAuthenticated) {
         final userData = await AuthManager.getCurrentUser();
-        print('User is authenticated: $userData');
+        AppLogger.info('User is authenticated', userData);
       } else {
-        print('User needs to login');
+        AppLogger.info('User needs to login');
       }
     } catch (e) {
-      print('Error checking auth status: $e');
+      AppLogger.error('Error checking auth status', e);
     }
   }
 
@@ -165,9 +181,9 @@ class OtpExamples {
   static Future<void> logoutExample() async {
     try {
       await OtpService.logout();
-      print('User logged out successfully');
+      AppLogger.info('User logged out successfully');
     } catch (e) {
-      print('Logout failed: $e');
+      AppLogger.error('Logout failed', e);
     }
   }
 
@@ -179,7 +195,7 @@ class OtpExamples {
         countryCode: '855',
         phone: '974976736',
       );
-      print('OTP sent');
+      AppLogger.info('OTP sent');
 
       // Step 2: Login with OTP (token will be saved automatically)
       final response = await OtpService.loginWithOTP(
@@ -188,14 +204,14 @@ class OtpExamples {
         otp: '123456',
         password: 'securepassword',
       );
-      print('Login successful, token saved automatically. Response: $response');
+      AppLogger.info('Login successful, token saved automatically', response);
 
       // Step 3: Check if user is now authenticated
       final isAuth = await AuthManager.isAuthenticated();
-      print('Is authenticated: $isAuth');
+      AppLogger.info('Authentication status', {'isAuthenticated': isAuth});
 
     } catch (e) {
-      print('Login flow failed: $e');
+      AppLogger.error('Login flow failed', e);
     }
   }
 }

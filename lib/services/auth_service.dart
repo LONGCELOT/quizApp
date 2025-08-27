@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart';
+import '../utils/app_logger.dart';
 
 class AuthService {
   static const String _authDataPath = 'assets/auth.json';
@@ -83,7 +84,7 @@ class AuthService {
     };
     
     // In real implementation, send SMS here
-    print('DEBUG: OTP for $phoneNumber is $otp'); // For testing
+    AppLogger.debug('DEBUG: OTP for $phoneNumber is $otp'); // For testing
     
     return AuthResult(
       success: true,
@@ -154,19 +155,19 @@ class AuthService {
     required String identifier, // username or phone number
     required String password,
   }) async {
-    print('[DEBUG] Login attempt - identifier: "$identifier", password: "$password"');
+    AppLogger.debug('[DEBUG] Login attempt - identifier: "$identifier", password: "$password"');
     
     await _simulateDelay();
     await _loadAuthData();
     
-    print('[DEBUG] Loaded auth data: $_authData');
+    AppLogger.debug('[DEBUG] Loaded auth data: $_authData');
     
     final users = _authData['users'] as List;
-    print('[DEBUG] Users found: ${users.length}');
-    
+    AppLogger.debug('[DEBUG] Users found: ${users.length}');
+
     for (int i = 0; i < users.length; i++) {
       final user = users[i];
-      print('[DEBUG] User $i: username="${user['username']}", phone="${user['phoneNumber']}", password="${user['password']}"');
+      AppLogger.debug('[DEBUG] User $i: username="${user['username']}", phone="${user['phoneNumber']}", password="${user['password']}"');
     }
     
     // Find user by username or phone number
@@ -176,17 +177,17 @@ class AuthService {
         final phoneMatch = user['phoneNumber'] == identifier;
         final passwordMatch = user['password'] == password;
         
-        print('[DEBUG] Checking user: username="$usernameMatch" (${user['username']} == $identifier), phone="$phoneMatch" (${user['phoneNumber']} == $identifier), password="$passwordMatch"');
+        AppLogger.debug('[DEBUG] Checking user: username="$usernameMatch" (${user['username']} == $identifier), phone="$phoneMatch" (${user['phoneNumber']} == $identifier), password="$passwordMatch"');
         
         return (usernameMatch || phoneMatch) && passwordMatch;
       },
       orElse: () => null,
     );
     
-    print('[DEBUG] Found user: $user');
+    AppLogger.debug('[DEBUG] Found user: ', user);
     
     if (user == null) {
-      print('[DEBUG] Login failed - no matching user found');
+      AppLogger.debug('[DEBUG] Login failed - no matching user found');
       return AuthResult(success: false, message: 'Invalid credentials');
     }
     
@@ -226,7 +227,7 @@ class AuthService {
       'type': 'reset'
     };
     
-    print('DEBUG: Reset OTP for $phoneNumber is $otp'); // For testing
+    AppLogger.debug('DEBUG: Reset OTP for $phoneNumber is ', otp); // For testing
     
     return AuthResult(
       success: true,
@@ -317,7 +318,7 @@ class AuthService {
   static String? getDebugOTP(String phoneNumber) {
     final otpData = _authData['otpCodes']?[phoneNumber];
     final otp = otpData?['code'];
-    print('DEBUG: getDebugOTP for $phoneNumber returns: $otp');
+    AppLogger.debug('DEBUG: getDebugOTP for $phoneNumber returns: ', otp);
     return otp;
   }
   
@@ -329,42 +330,42 @@ class AuthService {
     await _simulateDelay();
     await _loadAuthData();
     
-    print('DEBUG: Verifying OTP for $phoneNumber');
-    print('DEBUG: Entered OTP: $otp');
-    print('DEBUG: Expected type: $type');
-    
+    AppLogger.debug('DEBUG: Verifying OTP for ', phoneNumber);
+    AppLogger.debug('DEBUG: Entered OTP: ', otp);
+    AppLogger.debug('DEBUG: Expected type: ', type);
+
     // Ensure otpCodes exists
     _authData['otpCodes'] ??= {};
     
     final otpData = _authData['otpCodes'][phoneNumber];
-    print('DEBUG: Stored OTP data: $otpData');
-    print('DEBUG: All stored OTPs: ${_authData['otpCodes']}');
-    
+    AppLogger.debug('DEBUG: Stored OTP data: ', otpData);
+    AppLogger.debug('DEBUG: All stored OTPs: ', _authData['otpCodes']);
+
     if (otpData == null) {
-      print('DEBUG: No OTP data found in storage');
+      AppLogger.debug('DEBUG: No OTP data found in storage');
       return AuthResult(success: false, message: 'No OTP found for this phone number');
     }
     
     final storedOTP = otpData['code'];
-    print('DEBUG: Stored OTP: $storedOTP');
+    AppLogger.debug('DEBUG: Stored OTP: ', storedOTP);
     
     if (otpData['code'] != otp) {
-      print('DEBUG: OTP mismatch - entered: $otp, stored: ${otpData['code']}');
+      AppLogger.debug('DEBUG: OTP mismatch - entered: $otp, stored: ${otpData['code']}');
       return AuthResult(success: false, message: 'Invalid OTP');
     }
     
     if (DateTime.now().millisecondsSinceEpoch > otpData['expiry']) {
-      print('DEBUG: OTP expired');
+      AppLogger.debug('DEBUG: OTP expired');
       _authData['otpCodes'].remove(phoneNumber); // Clean up expired OTP
       return AuthResult(success: false, message: 'OTP has expired');
     }
     
     if (otpData['type'] != type) {
-      print('DEBUG: OTP type mismatch - expected: $type, stored: ${otpData['type']}');
+      AppLogger.debug('DEBUG: OTP type mismatch - expected: $type, stored: ${otpData['type']}');
       return AuthResult(success: false, message: 'Invalid OTP type');
     }
-    
-    print('DEBUG: OTP verification successful!');
+
+    AppLogger.debug('DEBUG: OTP verification successful!');
     return AuthResult(
       success: true,
       message: 'OTP verified successfully',
@@ -373,8 +374,8 @@ class AuthService {
   
   static void setCurrentUser(Map<String, dynamic>? user) {
     _currentUser = user?['username'];
-    print('[DEBUG] Current user set to: $_currentUser');
-    print('[DEBUG] isLoggedIn now returns: $isLoggedIn');
+    AppLogger.debug('[DEBUG] Current user set to: ', _currentUser);
+    AppLogger.debug('[DEBUG] isLoggedIn now returns: ', isLoggedIn);
   }
 }
 

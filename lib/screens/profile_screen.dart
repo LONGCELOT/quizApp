@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quiztest/utils/app_logger.dart';
 import '../models/user_profile.dart';
 import '../services/api_service.dart';
 import '../services/token_service.dart';
@@ -60,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error fetching user profile: $e');
+      AppLogger.error('Error fetching user profile:', e);
       setState(() {
         _errorMessage = 'Failed to load profile. Please try again.';
         _isLoading = false;
@@ -125,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
     } catch (e) {
-      print('Error updating profile: $e');
+      AppLogger.error('Error updating profile: ', e);
       setState(() {
         _isLoading = false;
       });
@@ -185,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
                 }
               } catch (e) {
-                print('Error signing out: $e');
+                AppLogger.error('Error signing out: ', e);
                 if (mounted) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -526,7 +527,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
         widget.onPasswordChanged?.call();
       }
     } catch (e) {
-      print('Error changing password: $e');
+      AppLogger.error('Error changing password: ', e);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

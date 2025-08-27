@@ -1,16 +1,17 @@
 import '../services/api_service.dart';
 import '../constants/api_constants.dart';
+import 'app_logger.dart';
 
 class QuizTestHelper {
   static Future<void> testQuizAPIs() async {
-    print('🧪 Testing Quiz APIs...');
+    AppLogger.info('🧪 Testing Quiz APIs...');
     
     // Test each category
     for (int categoryId = 1; categoryId <= 8; categoryId++) {
       try {
-        print('📋 Testing Category $categoryId...');
+        AppLogger.info('📋 Testing Category $categoryId...');
         final questions = await ApiService.getQuestionsByCategory(categoryId: categoryId);
-        print('✅ Category $categoryId: ${questions.length} questions loaded');
+        AppLogger.info('✅ Category $categoryId: ${questions.length} questions loaded');
         
         if (questions.isNotEmpty) {
           final firstQuestion = questions.first;

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../models/home_data.dart';
 import '../services/api_service.dart';
 import '../services/token_service.dart';
+import '../utils/app_logger.dart';
 import 'quiz_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -71,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _isLoading = false;
         _errorMessage = null; // Don't show error, just use mock data
       });
-      print('Failed to fetch home data, using mock data: $e');
+      AppLogger.warning('Failed to fetch home data, using mock data', e);
     }
   }
 
@@ -400,18 +401,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
         try {
           // Load quiz questions from API for the selected category
-          print('Loading questions for category: ${category.id} (${category.getName(_languageCode)})');
+          AppLogger.quiz('Loading questions for category: ${category.id} (${category.getName(_languageCode)})');
           
           // Get authentication token
           final token = await TokenService.getToken();
-          print('🔑 Using token: ${token != null ? 'Available' : 'No token found'}');
+          AppLogger.auth('Token status for quiz loading', data: {'hasToken': token != null});
           
           final questions = await ApiService.getQuestionsByCategory(
             categoryId: category.id,
             token: token,
           );
           
-          print('Loaded ${questions.length} questions');
+          AppLogger.quiz('Questions loaded successfully', data: {'count': questions.length, 'categoryId': category.id});
           
           // Hide loading indicator
           Navigator.of(context).pop();
@@ -437,17 +438,17 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }
         } catch (e) {
-          print('API Error for category ${category.id}: $e');
+          AppLogger.error('API Error for category ${category.id}', e);
           // Hide loading indicator
           Navigator.of(context).pop();
           
           // If API fails and this is General Knowledge (category 1), try fallback to local JSON
           if (category.id == 1) {
-            print('Trying fallback to local JSON for General Knowledge');
+            AppLogger.info('Trying fallback to local JSON for General Knowledge');
             try {
               final data = await rootBundle.loadString('assets/list.json');
               final questions = json.decode(data);
-              print('Loaded ${questions.length} questions from local JSON');
+              AppLogger.info('Loaded questions from local JSON', {'count': questions.length});
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -459,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               );
             } catch (localError) {
-              print('Local JSON Error: $localError');
+              AppLogger.error('Local JSON Error', localError);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Failed to load quiz: $localError'),
